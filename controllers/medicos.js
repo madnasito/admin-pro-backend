@@ -1,5 +1,6 @@
 const { response } = require('express')
 const Medico = require('../models/medico')
+const Hospital = require('../models/hospital')
 
 const getMedicos = async(req, res = response) => {
 
@@ -50,20 +51,81 @@ const crearMedico = async(req, res = response) => {
     })
 }
 
-const actualizarMedico = (req, res) => {
+const actualizarMedico = async(req, res = response) => {
 
-    res.json({
-        ok: true,
-        msg: 'Actualizar medico'
-    })
+    const id = req.params.id;
+    const uid = req.uid;
+
+    try {
+
+        const medico = await Medico.findById(id);
+
+        if (!medico) {
+
+            return res.status(404).json({
+                ok: false,
+                err: 'No se ha encontrado el medico'
+            })
+        }
+
+        const hospital = await Hospital.findById(req.body.hospital)
+
+        if (!hospital) {
+            return res.status(404).json({
+                ok: false,
+                err: 'Ingrese un hospital correcto'
+            })
+        }
+
+        const cambiosMedico = {
+            ...req.body,
+            usuario: uid
+        }
+
+        const medicoActualizado = await Medico.findByIdAndUpdate(id, cambiosMedico, { new: true });
+
+        res.json({
+            ok: true,
+            medico: medicoActualizado
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            err: 'Hable con el administrador'
+        })
+    }
+
 }
 
-const borrarMedico = (req, res) => {
+const borrarMedico = async(req, res) => {
 
-    res.json({
-        ok: true,
-        msg: 'Borrar medico'
-    })
+    const id = req.params.id;
+    const uid = req.params.uid;
+
+    try {
+        const medico = await Medico.findById(id);
+
+        if (!medico) {
+            return res.status(404).json({
+                ok: false,
+                err: 'No se ha encontrado el medico'
+            })
+        }
+
+        const medicoBorrado = await Medico.findByIdAndRemove(id)
+
+        res.json({
+            ok: true,
+            medicoBorrado
+        })
+
+    } catch (error) {
+        return res.status(400).json({
+            ok: false,
+            err: 'Hable con el administrador'
+        })
+    }
 }
 
 module.exports = { getMedicos, crearMedico, actualizarMedico, borrarMedico }
