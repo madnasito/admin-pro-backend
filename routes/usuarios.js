@@ -10,7 +10,6 @@ const { getUsuarios, crearUsuario, actualizarUsuario, borrarUsuario } = require(
 router.get('/', validarJWT, getUsuarios)
 
 router.post('/', [
-        validarJWT,
         check('nombre', 'El nombre es obligatorio').not().isEmpty(),
         check('password', 'El password es obligatorio').not().isEmpty(),
         check('email', 'El email es obligatorio').isEmail().not().isEmpty(),
@@ -20,7 +19,6 @@ router.post('/', [
 )
 
 router.put('/:id', [
-    validarJWT,
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     check('email', 'El email es obligatorio').isEmail().not().isEmpty(),
     validarCampos
